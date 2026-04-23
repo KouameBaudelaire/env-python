@@ -1,0 +1,45 @@
+
+# Nom du workflow — apparaît dans l'onglet "Actions" de ton repo GitHub
+name: CI Python
+
+# Déclencheur — ce workflow se lance à chaque push sur n'importe quelle branche
+on: [push]
+
+# Liste des jobs à exécuter
+jobs:
+
+  # Nom du job
+  build:
+
+    # La machine sur laquelle le "job" va tourner
+    # ubuntu-latest = une VM Ubuntu fraîche fournie par GitHub
+    runs-on: ubuntu-latest
+
+    # Liste des étapes du job — exécutées dans l'ordre
+    steps:
+
+      # Étape 1 — Télécharge le code de ton repo dans la VM GitHub
+      # Sans ça, la VM ne connaît pas ton code
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+
+      # Étape 2 — Installe Python sur la VM GitHub
+      # "with" permet de préciser la version exacte à utiliser
+      - name: Configurer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Étape 3 — Installe toutes les librairies de ton projet
+      # pip install --upgrade pip : met pip à jour d'abord
+      # pip install -r requirements.txt : installe toutes les dépendances listées
+      - name: Installer les dépendances
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Étape 4 — Lance les tests automatiquement
+      # pytest cherche tous les fichiers test_*.py et les exécute
+      # Si un test échoue → le workflow échoue et GitHub t'envoie une notification
+      - name: Lancer les tests
+        run: python -m pytest
